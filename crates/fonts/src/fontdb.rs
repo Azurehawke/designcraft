@@ -799,6 +799,13 @@ pub fn system_font_dirs() -> Vec<std::path::PathBuf> {
         if let Some(l) = std::env::var_os("LOCALAPPDATA") {
             dirs.push(std::path::PathBuf::from(l).join("Microsoft\\Windows\\Fonts"));
         }
+    } else if cfg!(target_os = "android") {
+        // The system's fonts (Roboto, Noto, the CJK collections) and, with the Android build's
+        // HOME at shared storage, a Fonts folder there for the user's own.
+        dirs.extend(["/system/fonts", "/product/fonts"].map(Into::into));
+        if let Some(h) = &home {
+            dirs.push(h.join("Fonts"));
+        }
     } else {
         let xdg_data_home = std::env::var_os("XDG_DATA_HOME").map(std::path::PathBuf::from);
         dirs.extend(unix_font_dirs(home.as_deref(), xdg_data_home.as_deref()));

@@ -967,6 +967,8 @@ fn toggle_tabs_panel(app: &mut DesignApp) {
 /// Run a UI command; `None` if `id` isn't one.
 pub fn run_ui(app: &mut DesignApp, id: &str, p: &Value) -> Option<Result<Value, String>> {
     let was_find = app.ui.dialog.as_ref().is_some_and(|d| d.id == "findChange");
+    // Every UI command that may ask for a file is an `app.` one.
+    let _asker = crate::AskerScope::enter(|| id.starts_with("app.").then(|| crate::FileAsker::Command { id: id.to_string(), params: p.clone() }));
     let result = run_ui_inner(app, id, p);
     if was_find && app.ui.dialog.as_ref().is_none_or(|d| d.id != "findChange") {
         app.session.reset_find_scope();

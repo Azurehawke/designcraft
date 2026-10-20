@@ -87,6 +87,50 @@ pub struct Services {
     pub clipboard_text: Option<ClipboardFn>,
 }
 
+/// What the user started that is asking the host for a file: a UI command (`app.exportPdf`,
+/// `app.openDialog`…), an open dialog's OK, or a tool's request to place a file. `pick_open` and
+/// `pick_save` answer synchronously; a host whose file choice arrives later (the Android build's
+/// in-app browser) answers `None`, keeps [`file_asker`], and once the user has chosen hands it to
+/// [`DesignApp::repeat`] with its picker primed to answer the chosen path.
+#[derive(Clone, Debug)]
+pub enum FileAsker {
+    Command { id: String, params: Value },
+    Dialog(dialogs::Dialog),
+    /// A tool or engine command asked to open or place a file (`UiRequest::Pick`).
+    Open { purpose: String },
+}
+
+thread_local! {
+    static FILE_ASKERS: std::cell::RefCell<Vec<FileAsker>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// The outermost [`FileAsker`] running now, for a host's `pick_open` or `pick_save` to keep.
+/// `None` when the request came from elsewhere (a panel button).
+pub fn file_asker() -> Option<FileAsker> {
+    FILE_ASKERS.with(|a| a.borrow().first().cloned())
+}
+
+/// Marks `asker` as running until dropped.
+pub(crate) struct AskerScope(bool);
+
+impl AskerScope {
+    pub(crate) fn enter(asker: impl FnOnce() -> Option<FileAsker>) -> Self {
+        let Some(asker) = asker() else { return Self(false) };
+        FILE_ASKERS.with(|a| a.borrow_mut().push(asker));
+        Self(true)
+    }
+}
+
+impl Drop for AskerScope {
+    fn drop(&mut self) {
+        if self.0 {
+            FILE_ASKERS.with(|a| {
+                a.borrow_mut().pop();
+            });
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ScreenMode {
@@ -769,6 +813,19 @@ impl DesignApp {
         self.ui.status = format!("{}: {error}", crate::i18n::tr(&self.ui.language, feature));
     }
 
+    /// Run again what asked the host for a file ([`file_asker`]), once the host can answer it.
+    /// A dialog that asked is reopened as it was and confirmed.
+    pub fn repeat(&mut self, asker: FileAsker) -> Result<Value, String> {
+        match asker {
+            FileAsker::Command { id, params } => self.run(&id, params),
+            FileAsker::Dialog(d) => {
+                self.ui.dialog = Some(d);
+                dialogs::confirm(self)
+            }
+            FileAsker::Open { purpose } => self.pick_and_open(&purpose),
+        }
+    }
+
     /// THE entry point for every action (menus, shortcuts, palette, panels, control channel).
     pub fn run(&mut self, id: &str, params: Value) -> Result<Value, String> {
         if let Some(r) = menus::run_ui(self, id, &params) {
@@ -948,6 +1005,7 @@ impl DesignApp {
                 UiRequest::View { params } => canvas::apply_view_request(self, &params),
                 UiRequest::Pick { purpose, params } => {
                     let _ = params;
+                    let _asker = AskerScope::enter(|| Some(FileAsker::Open { purpose: purpose.clone() }));
                     let _ = self.pick_and_open(&purpose);
                 }
             }
@@ -3218,5 +3276,66 @@ mod load_styles_tests {
         assert_eq!(app.session.active_index(), Some(0));
         assert_eq!(names(&app), (vec![], vec!["Lead".to_string()]));
         assert!(app.session.documents()[1].doc.styles.char_style("Lead").is_none());
+    }
+}
+
+#[cfg(test)]
+mod file_asker_tests {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    use super::*;
+
+    /// A host whose save dialog answers a frame later: `None` the first time (noting what asked),
+    /// the primed path once primed.
+    fn late_host(app: &mut DesignApp) -> (Rc<RefCell<Vec<Option<FileAsker>>>>, Rc<RefCell<Option<String>>>, Rc<RefCell<Vec<String>>>) {
+        let asked: Rc<RefCell<Vec<Option<FileAsker>>>> = Rc::default();
+        let primed: Rc<RefCell<Option<String>>> = Rc::default();
+        let written: Rc<RefCell<Vec<String>>> = Rc::default();
+        let (a, p, w) = (asked.clone(), primed.clone(), written.clone());
+        app.services.pick_save = Some(Box::new(move |_name: &str| {
+            let answer = p.borrow_mut().take();
+            if answer.is_none() {
+                a.borrow_mut().push(file_asker());
+            }
+            answer
+        }));
+        app.services.write = Some(Box::new(move |path: &str, _bytes: &[u8]| {
+            w.borrow_mut().push(path.to_string());
+            Ok(())
+        }));
+        (asked, primed, written)
+    }
+
+    #[test]
+    fn a_late_file_choice_repeats_the_command_that_asked() {
+        let mut app = DesignApp::new(Session::new(), Services::default());
+        app.run("file.new", json!({})).unwrap();
+        let (asked, primed, written) = late_host(&mut app);
+        app.run("app.exportIdml", json!({})).unwrap();
+        assert!(written.borrow().is_empty());
+        let asker = asked.borrow_mut().pop().flatten().unwrap();
+        assert!(matches!(&asker, FileAsker::Command { id, .. } if id == "app.exportIdml"), "{asker:?}");
+        assert!(file_asker().is_none(), "nothing asks once the command has returned");
+        *primed.borrow_mut() = Some("/tmp/late.idml".into());
+        app.repeat(asker).unwrap();
+        assert_eq!(*written.borrow(), ["/tmp/late.idml"]);
+    }
+
+    #[test]
+    fn a_late_file_choice_reopens_and_confirms_the_dialog_that_asked() {
+        let mut app = DesignApp::new(Session::new(), Services::default());
+        app.run("file.new", json!({})).unwrap();
+        let (asked, primed, written) = late_host(&mut app);
+        app.run("app.exportPdf", json!({})).unwrap();
+        assert!(app.ui.dialog.is_some());
+        dialogs::confirm(&mut app).unwrap();
+        assert!(app.ui.dialog.is_none() && written.borrow().is_empty());
+        let asker = asked.borrow_mut().pop().flatten().unwrap();
+        assert!(matches!(&asker, FileAsker::Dialog(d) if d.id == "pdfExport"), "{asker:?}");
+        *primed.borrow_mut() = Some("/tmp/late.pdf".into());
+        app.repeat(asker).unwrap();
+        assert_eq!(*written.borrow(), ["/tmp/late.pdf"]);
+        assert!(app.ui.dialog.is_none());
     }
 }

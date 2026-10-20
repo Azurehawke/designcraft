@@ -3031,6 +3031,11 @@ fn find_change_params(d: &Dialog) -> Value {
 
 /// Apply the open dialog.
 pub fn confirm(app: &mut DesignApp) -> Result<Value, String> {
+    let _asker = crate::AskerScope::enter(|| app.ui.dialog.clone().map(crate::FileAsker::Dialog));
+    confirm_dialog(app)
+}
+
+fn confirm_dialog(app: &mut DesignApp) -> Result<Value, String> {
     let Some(d) = app.ui.dialog.take() else { return Err("no dialog open".into()) };
     if matches!(d.id.as_str(), "paragraphStyleOptions" | "characterStyleOptions") && d.fields.contains_key(PREVIEWED) {
         // Restore the original before the ordinary command commits one undoable edit.
