@@ -1,0 +1,65 @@
+== libdesigncraft_android.so
+warning: Environment variable `ANDROID_NDK_HOME = "/usr/local/lib/android/sdk/ndk/30.0.16248370"` doesn't match `ANDROID_NDK_ROOT = "/usr/local/lib/android/sdk/ndk/27.3.13750724"`
+    Building arm64-v8a (aarch64-linux-android)
+[1m[92m    Updating[0m git repository `https://github.com/storytold/craft-libs`
+[1m[92m    Updating[0m crates.io index
+[1m[92m     Locking[0m 16 packages to highest Rust 1.95 compatible versions
+[1m[92m      Adding[0m android-activity v0.6.1 (/home/runner/work/designcraft/designcraft/vendor/android-activity)
+[1m[92m      Adding[0m android_log-sys v0.3.2
+[1m[92m      Adding[0m android_logger v0.15.1
+[1m[92m      Adding[0m cesu8 v1.1.0
+[1m[92m      Adding[0m env_filter v0.1.4
+[1m[92m      Adding[0m jni v0.21.1 [1m[33m(available: v0.22.4)[0m
+[1m[92m      Adding[0m windows-sys v0.45.0
+[1m[92m      Adding[0m windows-targets v0.42.2
+[1m[92m      Adding[0m windows_aarch64_gnullvm v0.42.2
+[1m[92m      Adding[0m windows_aarch64_msvc v0.42.2
+[1m[92m      Adding[0m windows_i686_gnu v0.42.2
+[1m[92m      Adding[0m windows_i686_msvc v0.42.2
+[1m[92m      Adding[0m windows_x86_64_gnu v0.42.2
+[1m[92m      Adding[0m windows_x86_64_gnullvm v0.42.2
+[1m[92m      Adding[0m windows_x86_64_msvc v0.42.2
+[1m[92m      Adding[0m winit v0.30.13 (/home/runner/work/designcraft/designcraft/vendor/winit)
+[1m[92m Downloading[0m crates ...
+[1m[92m  Downloaded[0m chrono v0.4.45
+[1m[92m   Compiling[0m designcraft-color v0.13.0 (/home/runner/work/designcraft/designcraft/crates/color)
+[1m[92m   Compiling[0m designcraft-geom v0.13.0 (/home/runner/work/designcraft/designcraft/crates/geom)
+[1m[92m   Compiling[0m chrono v0.4.45
+[1m[92m   Compiling[0m designcraft-fonts v0.13.0 (/home/runner/work/designcraft/designcraft/crates/fonts)
+[1m[92m   Compiling[0m hayro-jbig2 v0.3.0 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m designcraft-doc v0.13.0 (/home/runner/work/designcraft/designcraft/crates/doc)
+[1m[92m   Compiling[0m hayro-syntax v0.7.2 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m hayro-cmap v0.1.0 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m hayro-write v0.7.0
+[1m[92m   Compiling[0m designcraft-images v0.13.0 (/home/runner/work/designcraft/designcraft/crates/images)
+[1m[92m   Compiling[0m designcraft-compose v0.13.0 (/home/runner/work/designcraft/designcraft/crates/compose)
+[1m[92m   Compiling[0m krilla v0.8.2 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m hayro-interpret v0.7.0 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m android-activity v0.6.1 (/home/runner/work/designcraft/designcraft/vendor/android-activity)
+[1m[92m   Compiling[0m hayro v0.7.1 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m winit v0.30.13 (/home/runner/work/designcraft/designcraft/vendor/winit)
+[1m[92m   Compiling[0m craft-pdf v0.1.0 (https://github.com/storytold/craft-libs?rev=9f75d3dc19b4b514c4f3d4847ed1ec1b0e86b4ef#9f75d3dc)
+[1m[92m   Compiling[0m krilla-svg v0.8.1
+[1m[92m   Compiling[0m designcraft-pdf v0.13.0 (/home/runner/work/designcraft/designcraft/crates/pdf)
+[1m[92m   Compiling[0m designcraft-render v0.13.0 (/home/runner/work/designcraft/designcraft/crates/render)
+[1m[92m   Compiling[0m designcraft-ui-egui v0.13.0 (/home/runner/work/designcraft/designcraft/crates/ui-egui)
+[1m[92m   Compiling[0m designcraft-textimport v0.13.0 (/home/runner/work/designcraft/designcraft/crates/textimport)
+[1m[92m   Compiling[0m designcraft-idml v0.13.0 (/home/runner/work/designcraft/designcraft/crates/idml)
+[1m[92m   Compiling[0m designcraft-pptx v0.13.0 (/home/runner/work/designcraft/designcraft/crates/pptx)
+[1m[92m   Compiling[0m designcraft-tools v0.13.0 (/home/runner/work/designcraft/designcraft/crates/tools)
+[1m[92m   Compiling[0m designcraft-format v0.13.0 (/home/runner/work/designcraft/designcraft/crates/format)
+[1m[92m   Compiling[0m designcraft-epub v0.13.0 (/home/runner/work/designcraft/designcraft/crates/epub)
+[1m[92m   Compiling[0m designcraft-engine v0.13.0 (/home/runner/work/designcraft/designcraft/crates/engine)
+[1m[92m   Compiling[0m egui-wgpu v0.36.2
+[1m[92m   Compiling[0m egui-winit v0.36.2
+[1m[92m   Compiling[0m eframe v0.36.2
+[1m[92m   Compiling[0m designcraft-android v0.13.0 (/home/runner/work/designcraft/designcraft/apps/designcraft-android)
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 2m 54s
+     Copying libraries to /home/runner/work/designcraft/designcraft/target/android-apk/jniLibs
+== resources and manifest
+== activity class
+Note: /home/runner/work/designcraft/designcraft/packaging/android/java/ai/storyteller/designcraft/DesignCraftActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+== native library
+== align and sign
+-rw-r--r-- 1 runner runner 29856363 Oct 25 14:10 /home/runner/work/designcraft/designcraft/target/android-apk/designcraft.apk
